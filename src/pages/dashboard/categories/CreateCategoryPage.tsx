@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect} from 'react';
 import {
     Box,
     Button,
@@ -10,11 +10,9 @@ import {
     FormLabel,
     Input
 } from "@chakra-ui/react";
-import {CategoriesCubits, Category, CreateCategoryCubit} from "./CategoriesCubits";
 import {useNavigate, useParams} from "react-router-dom";
-import {GenericResponse} from "../../../utils/CommonResponses";
-import {chainCubits} from "../../../utils/ContextCreator";
-
+import {Category} from "../../../network/models/ResponseModels";
+import {useCreateCategory, useLoadCategory} from "./CategoriesQueries";
 
 const CreateCategoryPage = () => {
     const [name, setName] = React.useState("");
@@ -22,48 +20,32 @@ const CreateCategoryPage = () => {
     const navigate = useNavigate();
     const {id, parent} = useParams<{ id: string, parent: string }>();
 
-    const cubit = CategoriesCubits.ctx.useCubitContext();
-    const createCubit = CreateCategoryCubit.ctx.useCubitContext();
 
-    useEffect(
+    const loadQuery = useLoadCategory(id);
+
+    const createMutation = useCreateCategory(
+        id,
         () => {
-
-            if (id !== undefined) {
-                cubit?.fetchData({
-                    id: id
-                });
-            }
-        }, []
-    )
-
-    useEffect(
-        () => {
-            if (id === undefined) {
+            if (parent !== undefined) {
+                navigate("/categories/" + parent);
                 return;
             }
-
-            if (cubit?.isSuccess) {
-                let data = cubit.data as GenericResponse<Category>;
-                setName(data.data.name);
-            }
-        }, [cubit?.response]
-    )
+            navigate("/categories");
+        }
+    );
 
     useEffect(
         () => {
-
-            if (createCubit?.isSuccess) {
-                navigate("/categories");
-                createCubit.reset();
+            if (loadQuery.isSuccess) {
+                let data = loadQuery.data as Category;
+                setName(data.name);
             }
-
-        }, [createCubit?.response]
+        }, [loadQuery.isSuccess],
     )
-
 
     const createButtonBloc = () => {
 
-        if (createCubit?.isLoading) {
+        if (createMutation?.isLoading) {
             return (
                 <Button isLoading={true} width={"100vw"} mt={"5"} loadingText={"Creating..."}>Sign in</Button>
             )
@@ -76,7 +58,7 @@ const CreateCategoryPage = () => {
                         setIsError(true);
                         return;
                     }
-                    createCubit?.fetchData({
+                    createMutation?.mutateAsync({
                             name: name,
                             id: id,
                             parent: parent !== undefined ? parent : null,
@@ -103,7 +85,6 @@ const CreateCategoryPage = () => {
                            value={name}
                            onChange={
                                (e) => {
-                                   // setName(e.target.value)
                                    setName(e.target.value)
                                }
                            }/>
@@ -126,16 +107,4 @@ const CreateCategoryPage = () => {
     );
 }
 
-export default chainCubits(
-    CreateCategoryPage,
-    [
-        {
-            ctx: CategoriesCubits.ctx,
-            instance: new CategoriesCubits()
-        },
-        {
-            ctx: CreateCategoryCubit.ctx,
-            instance: new CreateCategoryCubit()
-        },
-    ],
-)
+export default CreateCategoryPage;

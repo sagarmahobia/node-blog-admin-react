@@ -1,4 +1,6 @@
 import axios from "axios";
+import {AxiosResponse} from "axios/index";
+import {GenericResponse} from "./CommonResponses";
 
 const api = axios.create({
     baseURL: 'http://localhost:3000',
@@ -30,3 +32,23 @@ api.interceptors.request.use(config => {
 
 
 export default api;
+
+class MyError extends Error {
+}
+
+export function catchError(promise: Promise<AxiosResponse<GenericResponse<any>>>) {
+
+    return promise.then(
+        (response) => {
+            if (response.data.success) {
+                return response.data.data;
+            } else {
+                throw new MyError(response.data.message);
+            }
+        }
+    ).catch(
+        (error) => {
+            throw new MyError(error.message);
+        }
+    );
+}

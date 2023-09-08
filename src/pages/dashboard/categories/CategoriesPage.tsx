@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Link, useParams,} from "react-router-dom";
 import {
     AlertDialog,
@@ -17,64 +17,29 @@ import {
 } from "@chakra-ui/react";
 
 import {AddIcon} from '@chakra-ui/icons';
-import {GenericResponse} from "../../../utils/CommonResponses";
-import {Category, DeleteCategoryCubit, LoadCategoriesCubit} from "./CategoriesCubits";
-import {chainCubits} from "../../../utils/ContextCreator";
+import {useQueryClient} from "@tanstack/react-query";
+import {Category} from "../../../network/models/ResponseModels";
+import {useCategories, useDeleteCategory} from "./CategoriesQueries";
 
 const CategoriesPage = () => {
 
-    // const dispatch = useDispatch<AppDispatch>();
-    // const select = useSelector((state: RootState) => state.categories);
-
-    const deleteCubit = DeleteCategoryCubit.ctx.useCubitContext();
-    const cubit = LoadCategoriesCubit.ctx.useCubitContext();
-
     const {id} = useParams<{ id: string }>();
 
+    const categoriesQuery = useCategories(id);
 
-    const fetchCategories = () => {
-        if (id !== undefined) {
-            cubit?.fetchData(
-                {
-                    id: id
-                }
-            )
-        } else {
-            cubit?.fetchData(
-                {
-                    id: null
-                }
-            )
-        }
-    }
-
-    useEffect(() => {
-        fetchCategories();
-    }, [id]);
-
-    useEffect(
-        () => {
-            if (deleteCubit?.isSuccess) {
-                let data = deleteCubit.data as GenericResponse<any>;
-                if (data.success) {
-                    fetchCategories();
-                }
-            }
-        }, [deleteCubit?.response]
-    )
 
     let content = (<>Loaded</>);
 
-    if (cubit?.isLoading || deleteCubit?.isLoading) {
+    if (categoriesQuery?.isLoading) {
 
         content = (
             <Flex justifyContent={"center"} alignItems={"center"}>
                 <Spinner p={"5"} m={"10"}></Spinner>
             </Flex>
         );
-    } else if (cubit?.isSuccess) {
+    } else if (categoriesQuery?.isSuccess) {
 
-        if (cubit.data.data.length < 1) {
+        if (categoriesQuery.data.length < 1) {
             content = (
                 <Flex justifyContent={"center"} alignItems={"center"}>
                     <Box p={"5"} m={"10"} fontSize={"24"}>
@@ -85,7 +50,7 @@ const CategoriesPage = () => {
         } else {
             content = (
                 < >
-                    {cubit.data.data && (cubit.data.data).map((category: Category) => {
+                    {categoriesQuery.data && (categoriesQuery.data).map((category: Category) => {
                         return (
                             <Flex m={"5"} key={category.id}>
                                 <Box fontSize={"24"} fontWeight={"bold"}>
@@ -110,7 +75,7 @@ const CategoriesPage = () => {
                 </>
             );
         }
-    } else if (cubit?.isError) {
+    } else if (categoriesQuery?.isError) {
         content = (
             <Flex justifyContent={"center"} alignItems={"center"}>
                 <Box p={"5"} m={"10"}>
@@ -145,11 +110,11 @@ const CategoriesPage = () => {
 }
 
 function DeleteCategory({id}: { id: string }) {
-    const {isOpen, onOpen, onClose} = useDisclosure()
-    const cancelRef = React.useRef<any>()
-    // const dispatch = useDispatch<AppDispatch>();
+    const {isOpen, onOpen, onClose} = useDisclosure();
+    const cancelRef = React.useRef<any>();
 
-    const deleteCubit = DeleteCategoryCubit.ctx.useCubitContext();
+
+    const deleteMutation = useDeleteCategory();
     return (
         <>
             <Button ml={"4"} colorScheme='red' onClick={onOpen}>Delete</Button>
@@ -175,7 +140,7 @@ function DeleteCategory({id}: { id: string }) {
                             </Button>
                             <Button colorScheme='red' onClick={() => {
                                 onClose();
-                                deleteCubit?.fetchData({id: id});
+                                deleteMutation.mutateAsync(id);
                             }} ml={3}>
                                 Delete
                             </Button>
@@ -188,19 +153,7 @@ function DeleteCategory({id}: { id: string }) {
 }
 
 
-export default chainCubits(
-    CategoriesPage,
-    [
-        {
-            ctx: DeleteCategoryCubit.ctx,
-            instance: new DeleteCategoryCubit()
-        },
-        {
-            ctx: LoadCategoriesCubit.ctx,
-            instance: new LoadCategoriesCubit()
-        }
-    ],
-);
+export default CategoriesPage;
 
 export interface Categories {
     success: boolean

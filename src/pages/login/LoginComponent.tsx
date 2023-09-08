@@ -1,9 +1,7 @@
 import React, {useEffect} from 'react';
 import {Box, Button, Flex, FormControl, FormLabel, Heading, Input, Stack} from "@chakra-ui/react";
 import {useNavigate} from "react-router-dom";
-import {LoginCubit} from "./LoginCubit";
-import {observer} from "mobx-react";
-
+import {useLogin} from "./LoginQueries";
 
 interface LoginState {
     email: string;
@@ -18,7 +16,13 @@ const LoginComponent = () => {
     const state = React.useRef<LoginState>({} as LoginState);
     const navigate = useNavigate();
 
-    const cubit = LoginCubit.ctx.useCubitContext();
+    // const cubit = LoginCubit.ctx.useCubitContext();
+
+    const loginQuery = useLogin(
+        () => {
+            navigate("/");
+        }
+    );
 
     useEffect(
         () => {
@@ -28,18 +32,9 @@ const LoginComponent = () => {
         }, []
     )
 
-    useEffect(
-        () => {
-            if (cubit?.isSuccess) {
-                navigate("/");
-                cubit.reset();
-            }
-        }, [cubit?.response]
-    )
-
     const loginButtonBloc = () => {
 
-        if (cubit?.isLoading) {
+        if (loginQuery?.isLoading) {
             return (
                 <Button isLoading={true} loadingText={"Signing in..."}>Sign in</Button>
             )
@@ -48,7 +43,12 @@ const LoginComponent = () => {
         return (
             <Button onClick={
                 () => {
-                    cubit?.fetchData(state.current);
+                    loginQuery?.mutateAsync(
+                        {
+                            email: state.current.email,
+                            password: state.current.password
+                        }
+                    );
                 }
             }>Sign in</Button>
         )
@@ -95,4 +95,4 @@ const LoginComponent = () => {
     );
 };
 
-export default LoginCubit.ctx.withCubit(observer(LoginComponent), new LoginCubit());
+export default LoginComponent;

@@ -1,34 +1,75 @@
-import {Box, Button, Card, Flex, Spacer, Spinner} from "@chakra-ui/react";
+import {
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogOverlay,
+    Box,
+    Button,
+    Card,
+    Flex,
+    Spacer,
+    Spinner,
+    useDisclosure
+} from "@chakra-ui/react";
 import {Link} from "react-router-dom";
 import {AddIcon} from "@chakra-ui/icons";
-import React, {useEffect} from "react";
-import {Article, ListArticlesCubit} from "./ArticlesController";
-import {Category} from "../categories/CategoriesCubits";
-import {observer} from "mobx-react";
+import React from "react";
+import {Article} from "../../../network/models/ResponseModels";
+import {useArticles, useDeleteArticle} from "./ArticleQueris";
 
+function DeleteArticle({id}: { id: string }) {
+    const {isOpen, onOpen, onClose} = useDisclosure();
+    const cancelRef = React.useRef<any>();
+
+
+    const deleteMutation = useDeleteArticle();
+    return (
+        <>
+            <Button ml={"4"} colorScheme='red' onClick={onOpen}>Delete</Button>
+
+            <AlertDialog
+                isOpen={isOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onClose}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize='lg' fontWeight='bold'>
+                            Delete Article
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure you want to delete this Article?
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onClose}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme='red' onClick={() => {
+                                onClose();
+                                deleteMutation.mutateAsync(id);
+                            }} ml={3}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
+        </>
+    )
+}
 const ArticlesListPage = () => {
 
-    const cubit: ListArticlesCubit | undefined = ListArticlesCubit.ctx.useCubitContext();
-
-    useEffect(
-        () => {
-            cubit?.fetchData("");
-            console.log("fetching");
-        }, []
-    );
-
+    const articleListQuery = useArticles();
+    
     var content = (<>Loading</>);
 
-    if (cubit?.isLoading) {
+    if (articleListQuery?.isSuccess) {
 
-        content = (
-            <Flex justifyContent={"center"} alignItems={"center"}>
-                <Spinner p={"5"} m={"10"}></Spinner>
-            </Flex>
-        );
-    } else if (cubit?.isSuccess) {
-
-        if (cubit.data.data.length < 1) {
+        if (articleListQuery.data.length < 1) {
             content = (
                 <Flex justifyContent={"center"} alignItems={"center"}>
                     <Box p={"5"} m={"10"} fontSize={"24"}>
@@ -39,7 +80,7 @@ const ArticlesListPage = () => {
         } else {
             content = (
                 < >
-                    {cubit.data.data && (cubit.data.data).map((article: Article) => {
+                    {articleListQuery.data && (articleListQuery.data).map((article: Article) => {
                         return (
                             <Flex m={"5"} key={article.id}>
                                 <Box fontSize={"24"} fontWeight={"normal"}>
@@ -52,22 +93,28 @@ const ArticlesListPage = () => {
                                 </Link>
 
                                 <Link
-                                    to={"/article/update/" + article.id}>
+                                    to={"/articles/update/" + article.id}>
                                     <Button ml={"4"}>Edit</Button>
                                 </Link>
-                                {/*<DeleteCategory id={category.id}/>*/}
+                                <DeleteArticle id={article.id}/>
                             </Flex>
                         )
                     })}
                 </>
             );
         }
-    } else if (cubit?.isError) {
+    } else if (articleListQuery?.isError) {
         content = (
             <Flex justifyContent={"center"} alignItems={"center"}>
                 <Box p={"5"} m={"10"}>
-                    Something went wrong
+                    <>{articleListQuery?.error.message?? "Something went wrong"}</>
                 </Box>
+            </Flex>
+        );
+    } else {
+        content = (
+            <Flex justifyContent={"center"} alignItems={"center"}>
+                <Spinner p={"5"} m={"10"}></Spinner>
             </Flex>
         );
     }
@@ -90,7 +137,4 @@ const ArticlesListPage = () => {
     );
 }
 
-export default ListArticlesCubit.ctx.withCubit(
-    observer(ArticlesListPage),
-    new ListArticlesCubit()
-);
+export default ArticlesListPage;
