@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link, useParams,} from "react-router-dom";
+import { Link, useParams, } from "react-router-dom";
 import {
     AlertDialog,
     AlertDialogBody,
@@ -16,14 +16,14 @@ import {
     useDisclosure
 } from "@chakra-ui/react";
 
-import {AddIcon} from '@chakra-ui/icons';
-import {useQueryClient} from "@tanstack/react-query";
-import {Category} from "../../../network/models/ResponseModels";
-import {useCategories, useDeleteCategory} from "./CategoriesQueries";
+import { AddIcon, DeleteIcon, EditIcon, ViewIcon } from '@chakra-ui/icons';
+import { useQueryClient } from "@tanstack/react-query";
+import { Category } from "../../../network/models/ResponseModels";
+import { useCategories, useDeleteCategory } from "./CategoriesQueries";
 
 const CategoriesPage = () => {
 
-    const {id} = useParams<{ id: string }>();
+    const { id } = useParams<{ id: string }>();
 
     const categoriesQuery = useCategories(id);
 
@@ -56,19 +56,27 @@ const CategoriesPage = () => {
                                 <Box fontSize={"24"} fontWeight={"bold"}>
                                     {category.name}
                                 </Box>
-                                <Spacer/>
+                                <Spacer />
                                 {
                                     id === undefined &&
 
                                     <Link to={"/categories/" + category.id}>
-                                        <Button ml={"4"}>View</Button>
+                                        <ViewIcon
+                                            boxSize={6}
+                                            color={"teal.500"}
+                                            m={2}
+                                        />
                                     </Link>
                                 }
                                 <Link
-                                    to={"/category/update/" + category.id}>
-                                    <Button ml={"4"}>Edit</Button>
+                                    to={"/category/update/" + category.id + (id !== undefined ? "/" + id : "")}>
+                                    <EditIcon
+                                        boxSize={6}
+                                        color={"teal.500"}
+                                        m={2}
+                                    />
                                 </Link>
-                                <DeleteCategory id={category.id}/>
+                                <DeleteCategory id={category.id} />
                             </Flex>
                         )
                     })}
@@ -91,10 +99,10 @@ const CategoriesPage = () => {
                 <Box fontSize={"24"} fontWeight={"bold"}>
                     Categories
                 </Box>
-                <Spacer/>
+                <Spacer />
                 {id ? <Link to={"/category/create/" + (id)}>
-                        <Button><AddIcon mr={"3"}></AddIcon>Create</Button>
-                    </Link>
+                    <Button><AddIcon mr={"3"}></AddIcon>Create</Button>
+                </Link>
                     :
                     <Link to={"/category/create"}>
                         <Button><AddIcon mr={"3"}></AddIcon>Create</Button>
@@ -109,16 +117,17 @@ const CategoriesPage = () => {
 
 }
 
-function DeleteCategory({id}: { id: string }) {
-    const {isOpen, onOpen, onClose} = useDisclosure();
+function DeleteCategory({ id }: { id: string }) {
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const cancelRef = React.useRef<any>();
 
 
     const deleteMutation = useDeleteCategory();
     return (
         <>
-            <Button ml={"4"} colorScheme='red' onClick={onOpen}>Delete</Button>
-
+            <Box as="button" onClick={onOpen} m={2}>
+                <DeleteIcon boxSize={6} color="red.500" />
+            </Box>
             <AlertDialog
                 isOpen={isOpen}
                 leastDestructiveRef={cancelRef}

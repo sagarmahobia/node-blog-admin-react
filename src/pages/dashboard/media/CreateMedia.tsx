@@ -1,8 +1,8 @@
-import {Box, Button, Card, Flex, FormControl, FormLabel, Heading, Image, Input, Stack} from "@chakra-ui/react";
-import React, {useState} from "react";
-import {useAnimation} from "framer-motion";
-import {useNavigate} from "react-router-dom";
-import {useUploadMedia} from "./MediaQueries";
+import { Box, Button, Card, Flex, FormControl, FormLabel, Heading, Image, Input, Stack } from "@chakra-ui/react";
+import React, { useState } from "react";
+import { useAnimation } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useUploadMedia } from "./MediaQueries";
 
 export const CreateMedia = () => {
 
@@ -19,9 +19,9 @@ export const CreateMedia = () => {
         if (createMutation?.isLoading) {
             return (
                 <Button isLoading={true}
-                        width={"100vw"}
-                        mt={"5"}
-                        loadingText={"Creating..."}>Sign in</Button>
+                    width={"100vw"}
+                    mt={"5"}
+                    loadingText={"Creating..."}>Create Media</Button>
             );
         }
         return (
@@ -46,11 +46,11 @@ export const CreateMedia = () => {
                     <FormControl>
                         <FormLabel htmlFor="name">
                             <Flex justifyContent={"center"} border={"2px"} p={"10"} borderRadius={"5px"}
-                                  borderColor={"gray.200"} width={"300px"}>
+                                borderColor={"gray.200"} width={"300px"}>
                                 {
                                     file ? (
                                         <Stack>
-                                            <Image src={URL.createObjectURL(file)}/>
+                                            <Image src={URL.createObjectURL(file)} />
                                         </Stack>
 
                                     ) : (
@@ -83,7 +83,21 @@ export const CreateMedia = () => {
                     </FormControl>
 
                     <Flex pt={"4"} justifyContent={"center"}>
-                        {createButtonBloc()}
+                        {/* {createButtonBloc()} */}
+                        <Button
+                            width={"100vw"}
+                            mt={"5"}
+                            onClick={() => {
+                                if (file === undefined) {
+                                    return;
+                                }
+                                createMutation?.mutateAsync(file);
+                            }}
+                            isLoading={createMutation?.isLoading}
+                            loadingText={"Creating..."}
+                        >
+                            {createMutation?.isLoading ? "Creating..." : "Create"}
+                        </Button>
                     </Flex>
                 </Box>
             </Box>

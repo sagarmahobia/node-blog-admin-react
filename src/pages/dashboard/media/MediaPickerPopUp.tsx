@@ -150,6 +150,9 @@ function MediaPickerPopUp(
                                                 </CardHeader>
                                                 <CardBody>
                                                     <Text minHeight={35}
+                                                              whiteSpace="nowrap"
+                                                              overflow="hidden"
+                                                              textOverflow="ellipsis"
                                                           maxHeight={35}>
                                                         {media.originalName}
                                                     </Text>

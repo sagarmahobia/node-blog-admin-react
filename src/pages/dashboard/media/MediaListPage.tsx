@@ -111,11 +111,13 @@ export const MediaListPage = () => {
                                         />
                                     </CardHeader>
                                     <CardBody py={2}>
-                                        <Text minHeight={35}
-                                              maxHeight={35}
-                                        >
-                                            {media.originalName}
-                                        </Text>
+                                    <Text minHeight={35}
+                                                              whiteSpace="nowrap"
+                                                              overflow="hidden"
+                                                              textOverflow="ellipsis"
+                                                          maxHeight={35}>
+                                                        {media.originalName}
+                                                    </Text>
                                     </CardBody>
 
                                     <CardFooter justify='right' p={2}>

@@ -158,7 +158,8 @@ export const uploadMedia = (file: File) => {
     formData.append("file", file);
     const config = {
         headers: {
-            'content-type': 'multipart/form-data',
+            'content-type': 'multipart/form-data', 
+            
         },
     };
     let promise = axios.post("media/create", formData,config);

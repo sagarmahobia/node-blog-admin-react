@@ -72,6 +72,7 @@ export const useCreateCategory = (
             onSuccess: (data: any) => {
                 onSuccess();
                 queryClient.invalidateQueries(["categories"]);
+                queryClient.invalidateQueries(["categoryDetail", id]);
             }
         }
     );

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import {
     Box,
     Button,
@@ -10,15 +10,15 @@ import {
     FormLabel,
     Input
 } from "@chakra-ui/react";
-import {useNavigate, useParams} from "react-router-dom";
-import {Category} from "../../../network/models/ResponseModels";
-import {useCreateCategory, useLoadCategory} from "./CategoriesQueries";
+import { useNavigate, useParams } from "react-router-dom";
+import { Category } from "../../../network/models/ResponseModels";
+import { useCreateCategory, useLoadCategory } from "./CategoriesQueries";
 
 const CreateCategoryPage = () => {
     const [name, setName] = React.useState("");
     const [isError, setIsError] = React.useState(false);
     const navigate = useNavigate();
-    const {id, parent} = useParams<{ id: string, parent: string }>();
+    const { id, parent } = useParams<{ id: string, parent: string }>();
 
 
     const loadQuery = useLoadCategory(id);
@@ -43,33 +43,6 @@ const CreateCategoryPage = () => {
         }, [loadQuery.isSuccess],
     )
 
-    const createButtonBloc = () => {
-
-        if (createMutation?.isLoading) {
-            return (
-                <Button isLoading={true} width={"100vw"} mt={"5"} loadingText={"Creating..."}>Sign in</Button>
-            )
-        }
-
-        return (
-            <Button width={"100vw"} mt={"5"} onClick={
-                () => {
-                    if (name === undefined || name === "") {
-                        setIsError(true);
-                        return;
-                    }
-                    createMutation?.mutateAsync({
-                            name: name,
-                            id: id,
-                            parent: parent !== undefined ? parent : null,
-                        }
-                    );
-
-                }
-            }>{id !== undefined ? "Update" : "Create"}</Button>
-        )
-    };
-
     return (
         <Card p={'5'}>
             <Flex p={'5'}>
@@ -82,12 +55,12 @@ const CreateCategoryPage = () => {
                 <FormControl isInvalid={isError}>
                     <FormLabel htmlFor="name">Category Name</FormLabel>
                     <Input mt={"2"} id="name" type="name" placeholder={"Enter Category Name"}
-                           value={name}
-                           onChange={
-                               (e) => {
-                                   setName(e.target.value)
-                               }
-                           }/>
+                        value={name}
+                        onChange={
+                            (e) => {
+                                setName(e.target.value)
+                            }
+                        } />
                     {!isError ? (
 
                         <FormHelperText>
@@ -100,7 +73,25 @@ const CreateCategoryPage = () => {
                 </FormControl>
 
                 <Flex pt={"4"} justifyContent={"center"}>
-                    {createButtonBloc()}
+                    <Button
+                        width={"100vw"}
+                        mt={"5"}
+                        onClick={() => {
+                            if (name === undefined || name === "") {
+                                setIsError(true);
+                                return;
+                            }
+                            createMutation?.mutateAsync({
+                                name: name,
+                                id: id,
+                                parent: parent !== undefined ? parent : null,
+                            });
+                        }}
+                        isLoading={createMutation?.isLoading}
+                        loadingText={"Creating... tada"}
+                    >
+                        {id !== undefined ? "Update" : "Create"}
+                    </Button>
                 </Flex>
             </Box>
         </Card>

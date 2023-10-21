@@ -26,6 +26,7 @@ function RouterComponent(props: PropTypes.InferProps<typeof RouterComponent.prop
                     <Route key={"createCategory"} path="/category/create" element={<CategoryCreate/>}/>
                     <Route key={"createChild"} path="/category/create/:parent" element={<CategoryCreate/>}/>
                     <Route key={"updatCategorye"} path="/category/update/:id" element={<CategoryCreate/>}/>
+                    <Route key={"updatSubCategorye"} path="/category/update/:id/:parent" element={<CategoryCreate/>}/>
 
                     <Route key={"categories"} path="/categories" element={<CategoriesPage/>}/>
                     <Route key={"subcategories"} path="/categories/:id" element={<CategoriesPage/>}/>

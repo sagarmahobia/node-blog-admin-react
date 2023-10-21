@@ -88,9 +88,16 @@ const ArticlesListPage = () => {
                                 </Box>
                                 <Spacer/>
 
-                                <Link to={"/article/" + article.id}>
-                                    <Button ml={"4"}>View</Button>
-                                </Link>
+                              
+                              
+                                    <Button ml={"4"}
+                                    
+                                    onClick={() => {
+                                        // http://localhost:3100/article/650ee98bd20c28ad9f674a0d
+                                        window.open("http://localhost:3100/article/" + article.id, "_blank")
+                                    }}
+                                    >View</Button>
+                              
 
                                 <Link
                                     to={"/articles/update/" + article.id}>
